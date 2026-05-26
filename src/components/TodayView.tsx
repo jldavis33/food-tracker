@@ -13,10 +13,22 @@ interface TodayViewProps {
   onRemoveConsumed: (consumedId: string) => void;
 }
 
-const TodayView: React.FC<TodayViewProps> = ({ 
-  inventory, 
-  consumed, 
-  onAddConsumed, 
+const FoodItemContent: React.FC<{ item: FoodItem }> = ({ item }) => (
+  <div className="d-flex justify-content-between align-items-center">
+    <div>
+      <div className="fw-semibold">{item.name}</div>
+      <small className="text-muted">{item.brand || item.category}</small>
+    </div>
+    <Badge bg="light" text="dark" className="border">
+      {item.nutrition.calories} cal
+    </Badge>
+  </div>
+);
+
+const TodayView: React.FC<TodayViewProps> = ({
+  inventory,
+  consumed,
+  onAddConsumed,
   onUpdateConsumed,
   onRemoveConsumed
 }) => {
@@ -90,35 +102,51 @@ const TodayView: React.FC<TodayViewProps> = ({
           <h4 className="mb-3 fw-bold">Available Inventory</h4>
           <p className="text-muted small mb-3">Drag items from here to your log</p>
           <Card className="border-0 shadow-sm">
-            <Droppable droppableId="inventory" isDropDisabled={true}>
-              {(provided) => (
-                <ListGroup 
-                  {...provided.droppableProps} 
+            <Droppable
+              droppableId="inventory"
+              isDropDisabled={true}
+              renderClone={(provided, _snapshot, rubric) => {
+                const item = availableInventory[rubric.source.index];
+                return (
+                  <ListGroup.Item
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    className="border-start-0 border-end-0 bg-light shadow-lg rounded"
+                    style={provided.draggableProps.style}
+                  >
+                    <FoodItemContent item={item} />
+                  </ListGroup.Item>
+                );
+              }}
+            >
+              {(provided, snapshot) => (
+                <ListGroup
+                  {...provided.droppableProps}
                   ref={provided.innerRef}
                   className="list-group-flush"
                   style={{ minHeight: '300px' }}
                 >
                   {availableInventory.map((item, index) => (
-                    <Draggable key={item.id} draggableId={item.id} index={index}>
-                      {(provided, snapshot) => (
-                        <ListGroup.Item
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className={`border-start-0 border-end-0 ${snapshot.isDragging ? 'bg-light shadow-lg rounded' : ''}`}
-                        >
-                          <div className="d-flex justify-content-between align-items-center">
-                            <div>
-                              <div className="fw-semibold">{item.name}</div>
-                              <small className="text-muted">{item.brand || item.category}</small>
-                            </div>
-                            <Badge bg="light" text="dark" className="border">
-                              {item.nutrition.calories} cal
-                            </Badge>
-                          </div>
+                    <React.Fragment key={item.id}>
+                      <Draggable draggableId={item.id} index={index}>
+                        {(provided, draggableSnapshot) => (
+                          <ListGroup.Item
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`border-start-0 border-end-0 ${draggableSnapshot.isDragging ? 'd-none' : ''}`}
+                          >
+                            <FoodItemContent item={item} />
+                          </ListGroup.Item>
+                        )}
+                      </Draggable>
+                      {snapshot.draggingFromThisWith === item.id && (
+                        <ListGroup.Item className="border-start-0 border-end-0 opacity-50 bg-light">
+                          <FoodItemContent item={item} />
                         </ListGroup.Item>
                       )}
-                    </Draggable>
+                    </React.Fragment>
                   ))}
                   {provided.placeholder}
                   {availableInventory.length === 0 && (
@@ -138,8 +166,8 @@ const TodayView: React.FC<TodayViewProps> = ({
           <Card className="border-0 shadow-sm">
             <Droppable droppableId="today">
               {(provided, snapshot) => (
-                <ListGroup 
-                  {...provided.droppableProps} 
+                <ListGroup
+                  {...provided.droppableProps}
                   ref={provided.innerRef}
                   className={`list-group-flush ${snapshot.isDraggingOver ? 'bg-light' : ''}`}
                   style={{ minHeight: '300px' }}
@@ -151,8 +179,8 @@ const TodayView: React.FC<TodayViewProps> = ({
                           <div className="fw-bold">{item.name}</div>
                           <small className="text-muted">{item.brand}</small>
                         </div>
-                        <Button 
-                          variant="link" 
+                        <Button
+                          variant="link"
                           className="text-danger p-0 text-decoration-none fs-4"
                           onClick={() => onRemoveConsumed(item.consumedId)}
                         >
@@ -162,9 +190,9 @@ const TodayView: React.FC<TodayViewProps> = ({
                       <div className="d-flex align-items-center bg-light p-2 rounded">
                         <div className="flex-grow-1 d-flex align-items-center">
                           <Form.Label className="me-2 mb-0 small fw-medium">Servings:</Form.Label>
-                          <Form.Control 
-                            type="number" 
-                            size="sm" 
+                          <Form.Control
+                            type="number"
+                            size="sm"
                             style={{ width: '70px' }}
                             value={item.amount}
                             min="0.1"
