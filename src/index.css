@@ -138,6 +138,15 @@ body {
   letter-spacing: 0.025em;
 }
 
+.stat-icon {
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1) rotate(-10deg);
+  opacity: 0.5 !important;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

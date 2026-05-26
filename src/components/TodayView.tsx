@@ -1,6 +1,8 @@
 import React from 'react';
 import { Row, Col, Card, ListGroup, Form, Badge, Button } from 'react-bootstrap';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFire, faDumbbell, faBreadSlice, faDroplet } from '@fortawesome/free-solid-svg-icons';
 import type { DropResult } from '@hello-pangea/dnd';
 import type { FoodItem, ConsumedItem } from '../types';
 import { v4 as uuidv4 } from 'uuid';
@@ -66,32 +68,60 @@ const TodayView: React.FC<TodayViewProps> = ({
         <Col md={3} className="mb-3">
           <Card className="stat-card h-100">
             <Card.Body>
-              <div className="stat-label text-truncate">Calories</div>
-              <div className="stat-value">{totals.calories.toFixed(0)}</div>
+              <div className="d-flex justify-content-between align-items-start">
+                <div>
+                  <div className="stat-label text-truncate">Calories</div>
+                  <div className="stat-value">{totals.calories.toFixed(0)}</div>
+                </div>
+                <div className="stat-icon" style={{ color: 'var(--primary-color)', opacity: 0.2 }}>
+                  <FontAwesomeIcon icon={faFire} size="2x" />
+                </div>
+              </div>
             </Card.Body>
           </Card>
         </Col>
         <Col md={3} className="mb-3">
           <Card className="stat-card h-100" style={{ borderLeftColor: '#10b981' }}>
             <Card.Body>
-              <div className="stat-label text-truncate">Protein</div>
-              <div className="stat-value">{totals.protein.toFixed(1)}<small className="fs-6 fw-normal ms-1 text-muted">g</small></div>
+              <div className="d-flex justify-content-between align-items-start">
+                <div>
+                  <div className="stat-label text-truncate">Protein</div>
+                  <div className="stat-value">{totals.protein.toFixed(1)}<small className="fs-6 fw-normal ms-1 text-muted">g</small></div>
+                </div>
+                <div className="stat-icon" style={{ color: '#10b981', opacity: 0.2 }}>
+                  <FontAwesomeIcon icon={faDumbbell} size="2x" />
+                </div>
+              </div>
             </Card.Body>
           </Card>
         </Col>
         <Col md={3} className="mb-3">
           <Card className="stat-card h-100" style={{ borderLeftColor: '#f59e0b' }}>
             <Card.Body>
-              <div className="stat-label text-truncate">Carbs</div>
-              <div className="stat-value">{totals.carbs.toFixed(1)}<small className="fs-6 fw-normal ms-1 text-muted">g</small></div>
+              <div className="d-flex justify-content-between align-items-start">
+                <div>
+                  <div className="stat-label text-truncate">Carbs</div>
+                  <div className="stat-value">{totals.carbs.toFixed(1)}<small className="fs-6 fw-normal ms-1 text-muted">g</small></div>
+                </div>
+                <div className="stat-icon" style={{ color: '#f59e0b', opacity: 0.2 }}>
+                  <FontAwesomeIcon icon={faBreadSlice} size="2x" />
+                </div>
+              </div>
             </Card.Body>
           </Card>
         </Col>
         <Col md={3} className="mb-3">
           <Card className="stat-card h-100" style={{ borderLeftColor: '#ef4444' }}>
             <Card.Body>
-              <div className="stat-label text-truncate">Fat</div>
-              <div className="stat-value">{totals.fat.toFixed(1)}<small className="fs-6 fw-normal ms-1 text-muted">g</small></div>
+              <div className="d-flex justify-content-between align-items-start">
+                <div>
+                  <div className="stat-label text-truncate">Fat</div>
+                  <div className="stat-value">{totals.fat.toFixed(1)}<small className="fs-6 fw-normal ms-1 text-muted">g</small></div>
+                </div>
+                <div className="stat-icon" style={{ color: '#ef4444', opacity: 0.2 }}>
+                  <FontAwesomeIcon icon={faDroplet} size="2x" />
+                </div>
+              </div>
             </Card.Body>
           </Card>
         </Col>
