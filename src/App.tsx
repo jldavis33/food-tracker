@@ -2,14 +2,15 @@ import { useState, useEffect } from 'react';
 import { Container, Nav, Navbar } from 'react-bootstrap';
 import FoodForm from './components/FoodForm';
 import InventoryView from './components/InventoryView';
-import TodayView from './components/TodayView';
+import LogView from './components/LogView';
 import type { FoodItem, ConsumedItem } from './types';
 import { storageService } from './services/storage';
 
-type View = 'today' | 'inventory' | 'add';
+type View = 'log' | 'inventory' | 'add';
 
 function App() {
-  const [view, setView] = useState<View>('today');
+  const [view, setView] = useState<View>('log');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [foodItems, setFoodItems] = useState<FoodItem[]>(() => storageService.getFoodItems());
   const [consumedItems, setConsumedItems] = useState<ConsumedItem[]>(() => storageService.getConsumedItems());
 
@@ -47,6 +48,10 @@ function App() {
     setConsumedItems(prev => prev.filter(item => item.consumedId !== consumedId));
   };
 
+  const filteredConsumedItems = consumedItems.filter(item =>
+    item.date.split('T')[0] === selectedDate
+  );
+
   return (
     <div className="App">
       <Navbar bg="white" variant="light" expand="lg" className="mb-5 py-3 border-bottom sticky-top">
@@ -58,11 +63,11 @@ function App() {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
               <Nav.Link
-                className={`px-3 ${view === 'today' ? 'fw-bold text-primary' : ''}`}
-                active={view === 'today'}
-                onClick={() => setView('today')}
+                className={`px-3 ${view === 'log' ? 'fw-bold text-primary' : ''}`}
+                active={view === 'log'}
+                onClick={() => setView('log')}
               >
-                Today's Log
+                Food Log
               </Nav.Link>
               <Nav.Link
                 className={`px-3 ${view === 'inventory' ? 'fw-bold text-primary' : ''}`}
@@ -84,10 +89,12 @@ function App() {
       </Navbar>
 
       <Container>
-        {view === 'today' && (
-          <TodayView
+        {view === 'log' && (
+          <LogView
             inventory={foodItems}
-            consumed={consumedItems}
+            consumed={filteredConsumedItems}
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
             onAddConsumed={handleAddConsumed}
             onUpdateConsumed={handleUpdateConsumed}
             onRemoveConsumed={handleRemoveConsumed}

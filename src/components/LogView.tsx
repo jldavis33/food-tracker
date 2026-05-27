@@ -2,14 +2,16 @@ import React from 'react';
 import { Row, Col, Card, ListGroup, Form, Badge, Button } from 'react-bootstrap';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFire, faDumbbell, faBreadSlice, faDroplet } from '@fortawesome/free-solid-svg-icons';
+import { faFire, faDumbbell, faBreadSlice, faDroplet, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import type { DropResult } from '@hello-pangea/dnd';
 import type { FoodItem, ConsumedItem } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
-interface TodayViewProps {
+interface LogViewProps {
   inventory: FoodItem[];
   consumed: ConsumedItem[];
+  selectedDate: string;
+  onDateChange: (date: string) => void;
   onAddConsumed: (item: ConsumedItem) => void;
   onUpdateConsumed: (consumedId: string, amount: number) => void;
   onRemoveConsumed: (consumedId: string) => void;
@@ -27,9 +29,11 @@ const FoodItemContent: React.FC<{ item: FoodItem }> = ({ item }) => (
   </div>
 );
 
-const TodayView: React.FC<TodayViewProps> = ({
+const LogView: React.FC<LogViewProps> = ({
   inventory,
   consumed,
+  selectedDate,
+  onDateChange,
   onAddConsumed,
   onUpdateConsumed,
   onRemoveConsumed
@@ -44,15 +48,47 @@ const TodayView: React.FC<TodayViewProps> = ({
     // If dragging from inventory to today
     if (source.droppableId === 'inventory' && destination.droppableId === 'today') {
       const item = availableInventory[source.index];
+
+      // Create a date for the selected day at the current time
+      const [year, month, day] = selectedDate.split('-').map(Number);
+      const consumedDate = new Date(year, month - 1, day);
+      const now = new Date();
+      consumedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+
       const newConsumedItem: ConsumedItem = {
         ...item,
         consumedId: uuidv4(),
         amount: 1,
-        date: new Date().toISOString(),
+        date: consumedDate.toISOString(),
       };
       onAddConsumed(newConsumedItem);
     }
   };
+
+  const changeDate = (days: number) => {
+    const [year, month, day] = selectedDate.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setDate(date.getDate() + days);
+
+    const newYear = date.getFullYear();
+    const newMonth = String(date.getMonth() + 1).padStart(2, '0');
+    const newDay = String(date.getDate()).padStart(2, '0');
+    onDateChange(`${newYear}-${newMonth}-${newDay}`);
+  };
+
+  const isToday = selectedDate === new Date().toISOString().split('T')[0];
+
+  const getFormattedDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString(undefined, {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const formattedDate = getFormattedDate(selectedDate);
 
   const totals = consumed.reduce((acc, item) => {
     acc.calories += item.nutrition.calories * item.amount;
@@ -64,6 +100,25 @@ const TodayView: React.FC<TodayViewProps> = ({
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
+      <div className="d-flex align-items-center justify-content-between mb-4 bg-white p-3 rounded shadow-sm">
+        <Button variant="outline-primary" onClick={() => changeDate(-1)}>
+          <FontAwesomeIcon icon={faChevronLeft} className="me-2" />
+          Previous
+        </Button>
+
+        <div className="text-center">
+          <h3 className="mb-0 fw-bold">
+            {isToday ? "Today's Log" : formattedDate}
+          </h3>
+          {!isToday && <small className="text-primary cursor-pointer" style={{ cursor: 'pointer' }} onClick={() => onDateChange(new Date().toISOString().split('T')[0])}>Go to Today</small>}
+        </div>
+
+        <Button variant="outline-primary" onClick={() => changeDate(1)}>
+          Next
+          <FontAwesomeIcon icon={faChevronRight} className="ms-2" />
+        </Button>
+      </div>
+
       <Row className="mb-5">
         <Col md={3} className="mb-3">
           <Card className="stat-card h-100">
@@ -191,8 +246,8 @@ const TodayView: React.FC<TodayViewProps> = ({
         </Col>
 
         <Col lg={6} className="mb-4">
-          <h4 className="mb-3 fw-bold">Today's Log</h4>
-          <p className="text-muted small mb-3">Your intake for today</p>
+          <h4 className="mb-3 fw-bold">{isToday ? "Today's Log" : "Daily Log"}</h4>
+          <p className="text-muted small mb-3">Your intake for {isToday ? "today" : formattedDate}</p>
           <Card className="border-0 shadow-sm">
             <Droppable droppableId="today">
               {(provided, snapshot) => (
@@ -243,7 +298,7 @@ const TodayView: React.FC<TodayViewProps> = ({
                   {consumed.length === 0 && (
                     <ListGroup.Item className="text-center py-5 text-muted">
                       <div className="mb-2">Empty Log</div>
-                      <small>Drop items here to track today's intake.</small>
+                      <small>Drop items here to track {isToday ? "today's" : "this day's"} intake.</small>
                     </ListGroup.Item>
                   )}
                 </ListGroup>
@@ -256,4 +311,4 @@ const TodayView: React.FC<TodayViewProps> = ({
   );
 };
 
-export default TodayView;
+export default LogView;
