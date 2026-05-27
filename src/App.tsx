@@ -3,6 +3,7 @@ import { Container, Nav, Navbar } from 'react-bootstrap';
 import FoodForm from './components/FoodForm';
 import InventoryView from './components/InventoryView';
 import LogView from './components/LogView';
+import { getLocalDateString } from './utils/dateUtils';
 import type { FoodItem, ConsumedItem } from './types';
 import { storageService } from './services/storage';
 
@@ -10,7 +11,7 @@ type View = 'log' | 'inventory' | 'add';
 
 function App() {
   const [view, setView] = useState<View>('log');
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(getLocalDateString());
   const [foodItems, setFoodItems] = useState<FoodItem[]>(() => storageService.getFoodItems());
   const [consumedItems, setConsumedItems] = useState<ConsumedItem[]>(() => storageService.getConsumedItems());
 

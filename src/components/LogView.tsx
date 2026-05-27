@@ -6,6 +6,7 @@ import { faFire, faDumbbell, faBreadSlice, faDroplet, faChevronLeft, faChevronRi
 import type { DropResult } from '@hello-pangea/dnd';
 import type { FoodItem, ConsumedItem } from '../types';
 import { v4 as uuidv4 } from 'uuid';
+import { getLocalDateString, formatISODateWithLocalContext } from '../utils/dateUtils';
 
 interface LogViewProps {
   inventory: FoodItem[];
@@ -49,17 +50,11 @@ const LogView: React.FC<LogViewProps> = ({
     if (source.droppableId === 'inventory' && destination.droppableId === 'today') {
       const item = availableInventory[source.index];
 
-      // Create a date for the selected day at the current time
-      const [year, month, day] = selectedDate.split('-').map(Number);
-      const consumedDate = new Date(year, month - 1, day);
-      const now = new Date();
-      consumedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
-
       const newConsumedItem: ConsumedItem = {
         ...item,
         consumedId: uuidv4(),
         amount: 1,
-        date: consumedDate.toISOString(),
+        date: formatISODateWithLocalContext(selectedDate),
       };
       onAddConsumed(newConsumedItem);
     }
@@ -76,7 +71,7 @@ const LogView: React.FC<LogViewProps> = ({
     onDateChange(`${newYear}-${newMonth}-${newDay}`);
   };
 
-  const isToday = selectedDate === new Date().toISOString().split('T')[0];
+  const isToday = selectedDate === getLocalDateString();
 
   const getFormattedDate = (dateStr: string) => {
     const [year, month, day] = dateStr.split('-').map(Number);
@@ -110,7 +105,7 @@ const LogView: React.FC<LogViewProps> = ({
           <h3 className="mb-0 fw-bold">
             {isToday ? "Today's Log" : formattedDate}
           </h3>
-          {!isToday && <small className="text-primary cursor-pointer" style={{ cursor: 'pointer' }} onClick={() => onDateChange(new Date().toISOString().split('T')[0])}>Go to Today</small>}
+          {!isToday && <small className="text-primary cursor-pointer" style={{ cursor: 'pointer' }} onClick={() => onDateChange(getLocalDateString())}>Go to Today</small>}
         </div>
 
         <Button variant="outline-primary" onClick={() => changeDate(1)}>
