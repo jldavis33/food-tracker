@@ -35,6 +35,10 @@ function App() {
     ));
   };
 
+  const handleDeleteFoodItem = (id: string) => {
+    setFoodItems(prev => prev.filter(item => item.id !== id));
+  };
+
   const handleAddConsumed = (item: ConsumedItem) => {
     setConsumedItems(prev => [...prev, item]);
   };
@@ -106,6 +110,7 @@ function App() {
           <InventoryView
             items={foodItems}
             onToggleInventory={handleToggleInventory}
+            onDeleteItem={handleDeleteFoodItem}
           />
         )}
 

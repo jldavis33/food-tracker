@@ -1,13 +1,16 @@
 import React from 'react';
-import { Table, Form, Card, Badge } from 'react-bootstrap';
+import { Table, Form, Card, Badge, Button } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import type { FoodItem } from '../types';
 
 interface InventoryViewProps {
   items: FoodItem[];
   onToggleInventory: (id: string) => void;
+  onDeleteItem: (id: string) => void;
 }
 
-const InventoryView: React.FC<InventoryViewProps> = ({ items, onToggleInventory }) => {
+const InventoryView: React.FC<InventoryViewProps> = ({ items, onToggleInventory, onDeleteItem }) => {
   return (
     <div className="mb-5">
       <div className="d-flex justify-content-between align-items-end mb-4">
@@ -16,7 +19,7 @@ const InventoryView: React.FC<InventoryViewProps> = ({ items, onToggleInventory 
           <p className="text-muted mb-0">Manage items currently in your kitchen</p>
         </div>
       </div>
-      
+
       <Card className="border-0 shadow-sm overflow-hidden">
         <Table hover responsive className="mb-0">
           <thead className="bg-light">
@@ -27,13 +30,14 @@ const InventoryView: React.FC<InventoryViewProps> = ({ items, onToggleInventory 
               <th className="px-4 py-3 border-0 text-muted small text-uppercase fw-bold">Category</th>
               <th className="px-4 py-3 border-0 text-muted small text-uppercase fw-bold text-end">Calories</th>
               <th className="px-4 py-3 border-0 text-muted small text-uppercase fw-bold text-end">P / C / F</th>
+              <th className="px-4 py-3 border-0 text-muted small text-uppercase fw-bold text-end" style={{ width: '80px' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item) => (
               <tr key={item.id} className="align-middle">
                 <td className="px-4 py-3">
-                  <Form.Check 
+                  <Form.Check
                     type="switch"
                     id={`switch-${item.id}`}
                     checked={item.isInInventory}
@@ -49,11 +53,24 @@ const InventoryView: React.FC<InventoryViewProps> = ({ items, onToggleInventory 
                 <td className="px-4 py-3 text-end text-muted small">
                   {item.nutrition.protein}g / {item.nutrition.carbohydrates}g / {item.nutrition.fat}g
                 </td>
+                <td className="px-4 py-3 text-end">
+                  <Button
+                    variant="link"
+                    className="text-danger p-0"
+                    onClick={() => {
+                      if (window.confirm(`Are you sure you want to delete "${item.name}"?`)) {
+                        onDeleteItem(item.id);
+                      }
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faTrash} />
+                  </Button>
+                </td>
               </tr>
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-5 text-muted">
+                <td colSpan={7} className="text-center py-5 text-muted">
                   No food items added yet. Go to "Add Food" to get started.
                 </td>
               </tr>
